@@ -5,13 +5,13 @@ const axios = require('axios')
 const app = express()
 const port = 3000
 
-const url="https://wsa-test.vercel.app/"
+const url = 'https://wsa-test.vercel.app/'
 
 async function getCards(url) {
   try {
     const browser = await puppeteer.launch({
-      headless: "new"
-    });
+      headless: 'new'
+    })
     const page = await browser.newPage()
     await page.goto(url)
 
@@ -19,14 +19,13 @@ async function getCards(url) {
 
     const content = await page.evaluate(() => {
       const divElements = Array.from(document.querySelectorAll('div'))
-      const timeElements = Array.from(document.querySelectorAll('time'))
-      const divsWithAAndDiv = [];
-      const divsWithAOnly = [];
+      const divsWithAAndDiv = []
+      const divsWithAOnly = []
 
-      divElements.forEach((div) => {
+      divElements.forEach(div => {
         const children = Array.from(div.children)
-        const hasA = children.some((child) => child.tagName === 'A')
-        const hasDiv = children.some((child) => child.tagName === 'DIV')
+        const hasA = children.some(child => child.tagName === 'A')
+        const hasDiv = children.some(child => child.tagName === 'DIV')
 
         if (hasA && hasDiv) {
           divsWithAAndDiv.push(div)
@@ -35,32 +34,35 @@ async function getCards(url) {
         }
       })
 
-      // const leafText = []
       const completeObjects = []
 
-      divsWithAAndDiv.forEach((div) => {
-        let title = ""
-        let description = ""
-        let image = ""
-        let href = ""
+      divsWithAAndDiv.forEach(div => {
+        let title = ''
+        let description = ''
+        let image = ''
+        let href = ''
+        let date = ''
 
         image = Array.from(div.querySelectorAll('img'))[0].getAttribute('src')
         absouluteImageURL = new URL(image, window.location.href)
         image = absouluteImageURL.toString()
-        
+
+        date = Array.from(div.querySelectorAll('time'))[0].textContent.trim()
+
         const aElementsWithSpan = Array.from(div.querySelectorAll('a > span'))
-        aElementsWithSpan.forEach((span) => {
-          title = span.nextSibling.textContent.trim()          
+        aElementsWithSpan.forEach(span => {
+          title = span.nextSibling.textContent.trim()
           description = span.parentElement.parentElement.nextElementSibling.textContent.trim()
           absoluteURL = new URL(span.parentElement.getAttribute('href'), window.location.href)
-          href = absoluteURL.toString()          
+          href = absoluteURL.toString()
         })
 
         completeObjects.push({
-          'title': title,
-          'short_description': description,
-          'image': image,
-          'href': href 
+          title: title,
+          short_description: description,
+          image: image,
+          href: href,
+          date: date
         })
         /*
         const leaves = Array.from(div.querySelectorAll('*')).filter(isLeafElement)
@@ -69,10 +71,9 @@ async function getCards(url) {
       })
 
       return completeObjects
-    });
+    })
     await browser.close()
     return content
-    
   } catch (error) {
     console.error(error)
   }
@@ -80,7 +81,7 @@ async function getCards(url) {
 
 app.get('/', async (req, res) => {
   const cards = await getCards(url)
-  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Type', 'application/json')
   res.send(JSON.stringify(cards, null, 2))
 })
 
