@@ -9,10 +9,34 @@ const url = 'https://wsa-test.vercel.app/'
 
 const words = require('./words.json')
 
-app.get('/', async (req, res) => {
-  const cards = await getCards(url)
-  res.setHeader('Content-Type', 'application/json')
-  res.send(JSON.stringify(cards, null, 2))
+app.get('/', async (req, res, next) => {
+  try {
+    const cards = await getCards(url)
+    res.setHeader('Content-Type', 'application/json')
+    res.send(JSON.stringify(cards, null, 2))
+  } catch (err) {
+    next(err)
+  }
+})
+
+app.get('/process-url', async (req, res, next) => {
+  const url = req.query.url
+  if (!url) {
+    return res.status(400).json({ error: 'URL parameter is required' })
+  }
+
+  try {
+    const cards = await getCards(url)
+    res.setHeader('Content-Type', 'application/json')
+    res.send(JSON.stringify(cards, null, 2))
+  } catch (err) {
+    next(err)
+  }
+})
+
+app.use((err, req, res, next) => {
+  console.error(err.stack)
+  res.status(500).json({ error: 'Internal Server Error' })
 })
 
 app.listen(port, () => {
@@ -20,30 +44,26 @@ app.listen(port, () => {
 })
 
 async function getCards(url) {
-  try {
-    const browser = await puppeteer.launch({
-      headless: 'new'
-    })
-    const page = await browser.newPage()
+  const browser = await puppeteer.launch({
+    headless: 'new'
+  })
+  const page = await browser.newPage()
 
-    await page.goto(url)
-    await page.waitForSelector('div')
-    const content = await page.evaluate(evaluateMainPage)
+  await page.goto(url)
+  await page.waitForSelector('div')
+  const content = await page.evaluate(evaluateMainPage)
 
-    for (c of content) {
-      await page.goto(c.href)
-      await page.waitForSelector('div > a')
-      c.sentiment = await page.evaluate(evaluateBlogPost)
-      moodResult = getMoodAndWordCount(c.sentiment)
-      c.sentiment = moodResult.sentiment
-      c.words = moodResult.words
-    }
-
-    await browser.close()
-    return content
-  } catch (error) {
-    console.error(error)
+  for (c of content) {
+    await page.goto(c.href)
+    await page.waitForSelector('div > a')
+    c.sentiment = await page.evaluate(evaluateBlogPost)
+    moodResult = getMoodAndWordCount(c.sentiment)
+    c.sentiment = moodResult.sentiment
+    c.words = moodResult.words
   }
+
+  await browser.close()
+  return content
 }
 
 function evaluateMainPage() {
