@@ -53,5 +53,5 @@ The sentiment analysis algorithm uses a dictionary I built from words found in e
 The article page text is then split into sanitized tokens (all lowercase, no punctuation). Every token that has a corresponding weight in the dictionary will get added to the article's sum. The overall sentiment of the blog post is the sign of its sum. If the sum is 0, the article is neutral. I thought of marking articles as neutral for sum values between -2 and 2, but there was no need for that with this example.
 
 ### Frontend
-The frontend uses Vue 3 (Composition API with script setup) and Tailwind CSS. It uses axios to send the request, then shows the resulting JSON in a `<textarea>`.
+The frontend uses Vue 3 (Composition API with script setup) and Tailwind CSS. It uses axios to send the request, then shows the resulting JSON in a `<textarea>`.           
 As a standout feature, I used an animated skeleton loader to model the loading state until the request response is obtained.
