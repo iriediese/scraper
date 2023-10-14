@@ -54,3 +54,4 @@ The article page text is then split into sanitized tokens (all lowercase, no pun
 
 ### Frontend
 The frontend uses Vue 3 (Composition API with script setup) and Tailwind CSS. It uses axios to send the request, then shows the resulting JSON in a `<textarea>`.
+As a standout feature, I used an animated skeleton loader to model the loading state until the request response is obtained.
