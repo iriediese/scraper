@@ -48,7 +48,7 @@ app.listen(port, () => {
 
 async function getCards(url) {
   const browser = await puppeteer.launch({
-    headless: 'new'
+    headless: 'old'
   })
   const page = await browser.newPage()
 
