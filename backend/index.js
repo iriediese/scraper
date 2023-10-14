@@ -56,15 +56,18 @@ async function getCards(url) {
   await page.waitForSelector('div')
   const content = await page.evaluate(evaluateMainPage)
 
-  for (c of content) {
-    await page.goto(c.href)
-    await page.waitForSelector('div > a')
-    c.sentiment = await page.evaluate(evaluateBlogPost)
-    moodResult = getMoodAndWordCount(c.sentiment)
+  const promises = content.map(async c => {
+    const subPage = await browser.newPage()
+    await subPage.goto(c.href)
+    await subPage.waitForSelector('div > a')
+    c.sentiment = await subPage.evaluate(evaluateBlogPost)
+    const moodResult = getMoodAndWordCount(c.sentiment)
     c.sentiment = moodResult.sentiment
     c.words = moodResult.words
-  }
+    await subPage.close()
+  })
 
+  await Promise.all(promises)
   await browser.close()
   return content
 }
