@@ -17,6 +17,10 @@ function handleSubmit() {
       result.value = JSON.stringify(response.data, null, 2)
       isLoading.value = false
     })
+    .catch(error => {
+      result.value = JSON.stringify(error.response.data, null, 2)
+      isLoading.value = false
+    })
 }
 </script>
 
@@ -33,7 +37,7 @@ function handleSubmit() {
       <button type="submit" class="bg-blue-700 text-white font-bold py-2 px-4 rounded">Submit</button>
     </form>
     <br />
-    <textarea v-show="result != ''" v-model="result"
+    <textarea v-show="result != '' && !isLoading" v-model="result"
       class="w-9/12 bg-slate-100 h-screen resize-none border rounded"></textarea>
 
     <div v-show="isLoading" class="border shadow rounded w-9/12 mx-auto">
