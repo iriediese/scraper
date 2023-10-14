@@ -1,9 +1,12 @@
 const express = require('express')
 const puppeteer = require('puppeteer')
 const axios = require('axios')
+const cors = require('cors')
 
 const app = express()
 const port = 3000
+
+app.use(cors())
 
 const url = 'https://wsa-test.vercel.app/'
 
